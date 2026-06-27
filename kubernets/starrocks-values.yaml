@@ -1,0 +1,83 @@
+# StarRocks on Minikube - Reduced resources for dev
+# Chart: starrocks/kube-starrocks
+
+operator:
+  starrocksOperator:
+    enabled: true
+    image:
+      repository: starrocks/operator
+      tag: v1.11.5
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+starrocks:
+  starrocksCluster:
+    name: my-starrocks
+    namespace: starrocks
+    enabledBe: true
+    enabledCn: false
+
+  # --- FE (Frontend) ---
+  starrocksFESpec:
+    replicas: 1
+    image:
+      repository: starrocks/fe-ubuntu
+      tag: "3.3-latest"
+    imagePullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+    resources:
+      requests:
+        cpu: 1
+        memory: 2Gi
+      limits:
+        cpu: 2
+        memory: 3Gi
+    storageSpec:
+      name: ""
+      storageSize: 5Gi
+      logStorageSize: 2Gi
+    config: |
+      LOG_DIR = ${STARROCKS_HOME}/log
+      DATE = "$(date +%Y%m%d-%H%M%S)"
+      JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true -Xmx2048m -XX:+UseG1GC -Xlog:gc*:${LOG_DIR}/fe.gc.log.$DATE:time"
+      http_port = 8030
+      rpc_port = 9020
+      query_port = 9030
+      edit_log_port = 9010
+      mysql_service_nio_enabled = true
+      sys_log_level = INFO
+
+  # --- BE (Backend) ---
+  starrocksBeSpec:
+    replicas: 1
+    image:
+      repository: starrocks/be-ubuntu
+      tag: "3.3-latest"
+    imagePullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+    resources:
+      requests:
+        cpu: 1
+        memory: 2Gi
+      limits:
+        cpu: 2
+        memory: 3Gi
+    storageSpec:
+      name: ""
+      storageSize: 10Gi
+      logStorageSize: 2Gi
+    config: |
+      be_port = 9060
+      webserver_port = 8040
+      heartbeat_service_port = 9050
+      brpc_port = 8060
+      sys_log_level = INFO
+      default_rowset_type = beta

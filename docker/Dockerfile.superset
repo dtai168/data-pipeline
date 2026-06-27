@@ -1,0 +1,20 @@
+FROM apache/superset:latest
+
+USER root
+
+# Install system deps for mysqlclient
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        default-libmysqlclient-dev \
+        build-essential \
+        pkg-config && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install DB drivers into the venv that Superset actually uses
+RUN /app/.venv/bin/python -m ensurepip && \
+    /app/.venv/bin/python -m pip install --no-cache-dir \
+        psycopg2-binary \
+        pymysql \
+        mysqlclient
+
+USER superset

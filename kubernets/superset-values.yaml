@@ -1,0 +1,41 @@
+# Superset on Minikube - simplified values
+# Uses built-in PostgreSQL + Redis
+
+adminUser: admin
+adminPassword: admin
+secretKey: "7fc80bc34090b9dc3017dbac6527fd96"
+
+# Built-in PostgreSQL
+postgresql:
+  enabled: true
+  primary:
+    persistence:
+      enabled: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+# Built-in Redis
+redis:
+  enabled: true
+  architecture: standalone
+  master:
+    persistence:
+      enabled: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+# Superset
+supersetNode:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+service:
+  type: NodePort
+  nodePort:
+    http: 30088

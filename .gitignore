@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# Data files (nặng, không push lên GitHub)
+data/*.xlsx
+
+
+# JARs (binary)
+jars/*.jar
+
+# Helm charts
+*.tgz
+
+# IDE
+.vscode/
+.idea/
+
+# Checkpoint
+checkpoint_last_processed.json
+
+# Spark temp
+Usersdtai168spark-local-dirs/

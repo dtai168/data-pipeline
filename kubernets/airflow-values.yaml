@@ -1,0 +1,78 @@
+# Airflow 2.10.5 Helm values - Minikube single-node
+# Chart: apache-airflow/airflow (appVersion 2.10.5)
+
+executor: KubernetesExecutor
+
+# Allow scheduler to launch worker pods
+allowPodLaunching: true
+
+# Airflow image
+defaultAirflowTag: "2.10.5"
+
+# --- Disable built-in PostgreSQL (use external DB) ---
+postgresql:
+  enabled: false
+
+# --- Data layer (metadata DB, secrets) ---
+data:
+  metadataConnection:
+    user: postgres
+    pass: postgres
+    protocol: postgresql
+    host: host.minikube.internal
+    port: 5432
+    db: airflow_metadata
+    sslmode: disable
+
+# --- Webserver ---
+webserver:
+  replicas: 1
+  service:
+    type: NodePort
+    ports:
+      - name: airflow-ui
+        port: "8080"
+        nodePort: 30080
+
+# --- Scheduler ---
+scheduler:
+  replicas: 1
+  extraVolumes:
+    - name: airflow-dags
+      configMap:
+        name: airflow-dags
+  extraVolumeMounts:
+    - name: airflow-dags
+      mountPath: /opt/airflow/dags/dag.py
+      subPath: dag.py
+
+# --- Triggerer ---
+triggerer:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 250m
+      memory: "512Mi"
+    limits:
+      cpu: 500m
+      memory: "1Gi"
+
+# --- RBAC for KubernetesExecutor pods ---
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+  name: airflow-worker
+
+# --- Config overrides ---
+config:
+  core:
+    executor: KubernetesExecutor
+    load_examples: 'False'
+  kubernetes_executor:
+    namespace: '{{ .Release.Namespace }}'
+    delete_worker_pods: 'True'
+    delete_worker_pods_on_failure: 'True'
+    worker_service_account_name: 'airflow-worker'
+    configuration_poll_interval: '10'
