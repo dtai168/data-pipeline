@@ -20,7 +20,7 @@ with DAG(
 
     run_spark_job = KubernetesPodOperator(
         namespace='airflow',
-        image='chatbot-spark-job:v2',
+        image='chatbot-spark-job:v3',
         name='spark-etl-task',
         task_id='run_pyspark_iceberg_ingestion',
         image_pull_policy='Never',

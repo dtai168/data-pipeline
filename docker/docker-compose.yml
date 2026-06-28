@@ -6,8 +6,8 @@ services:
     image: minio/minio
     container_name: minio
     ports:
-      - "9000:9000" 
-      - "9001:9001" 
+      - "9000:9000"
+      - "9001:9001"
     environment:
       MINIO_ROOT_USER: "dtai16805"
       MINIO_ROOT_PASSWORD: "dtai16805"
@@ -28,15 +28,15 @@ services:
         echo 'Bucket iceberg-warehouse ready.'
       "
 
-  # 2. Tầng Data Warehouse (Truy vấn tốc độ cao)
-  starrocks:
-    image: starrocks/allin1-ubuntu:latest
-    container_name: starrocks-all-in-one
-    ports:
-      - "9030:9030" 
-      - "8030:8030" 
-    volumes:
-      - starrocks_data:/starrocks/fe/meta
+  # 2. StarRocks — chay tren Minikube, KHONG dung Docker
+  # starrocks:
+  #   image: starrocks/allin1-ubuntu:latest
+  #   container_name: starrocks-all-in-one
+  #   ports:
+  #     - "9030:9030"
+  #     - "8030:8030"
+  #   volumes:
+  #     - starrocks_data:/starrocks/fe/meta
 
   # PostgreSQL (Superset metadata)
   postgres:
@@ -64,28 +64,26 @@ services:
     volumes:
       - postgres_hive_data:/var/lib/postgresql/data
 
-  # Hive Metastore (shared catalog for Spark + Trino)
-  hive-metastore:
-    build:
-      context: .
-      dockerfile: Dockerfile.hive
-    container_name: hive-metastore
-    ports:
-      - "9083:9083"
-    depends_on:
-      - postgres-hive
-      - minio
-    environment:
-      HIVE_CONF_DIR: /opt/hive/conf
-      HADOOP_CLASSPATH: "/opt/hive/lib/postgresql-42.6.0.jar:/opt/hadoop/share/hadoop/tools/lib/hadoop-aws-3.3.6.jar:/opt/hadoop/share/hadoop/tools/lib/aws-java-sdk-bundle-1.12.367.jar"
-      HIVE_AUX_JARS_PATH: "/opt/hive/lib/postgresql-42.6.0.jar,/opt/hadoop/share/hadoop/tools/lib/hadoop-aws-3.3.6.jar,/opt/hadoop/share/hadoop/tools/lib/aws-java-sdk-bundle-1.12.367.jar"
-    command: >
-      /bin/sh -c "
-        /opt/hive/bin/schematool -dbType postgres -info 2>/dev/null || /opt/hive/bin/schematool -dbType postgres -initSchema --verbose &&
-        /opt/hive/bin/hive --service metastore
-      "
-    volumes:
-      - ./core-site.xml:/opt/hive/conf/core-site.xml:ro
+  # Hive Metastore — chay tren Minikube, KHONG dung Docker
+  # hive-metastore:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.hive
+  #   container_name: hive-metastore
+  #   ports:
+  #     - "9083:9083"
+  #   depends_on:
+  #     - postgres-hive
+  #     - minio
+  #   environment:
+  #     HIVE_CONF_DIR: /opt/hive/conf
+  #   command: >
+  #     /bin/sh -c "
+  #       /opt/hive/bin/schematool -dbType postgres -info 2>/dev/null || /opt/hive/bin/schematool -dbType postgres -initSchema --verbose &&
+  #       /opt/hive/bin/hive --service metastore
+  #     "
+  #   volumes:
+  #     - ./core-site.xml:/opt/hive/conf/core-site.xml:ro
 
   # 3. Tầng Visualization (Dashboard)
   superset:
@@ -107,11 +105,9 @@ services:
         /usr/bin/run-server.sh
       "
     depends_on:
-      - starrocks
       - postgres
 
 volumes:
   minio_data:
-  starrocks_data:
   postgres_data:
   postgres_hive_data:

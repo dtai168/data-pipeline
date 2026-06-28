@@ -20,8 +20,10 @@ ENV SPARK_JARS_PACKAGES=
 WORKDIR /opt/spark/work-dir/
 
 # Nướng (Bake) code và data vào image
-COPY spark.py .
-COPY bot_dvc_hcm.xlsx .
-COPY bot_ddvc_hcm_bot_predict.xlsx .
+COPY scripts/spark.py .
+COPY data/bot_dvc_hcm.xlsx .
+COPY data/bot_ddvc_hcm_bot_predict.xlsx .
 
+USER root
+RUN ln -s /usr/bin/python3 /usr/bin/python
 USER spark

@@ -1,12 +1,26 @@
-# Data Pipeline - DVC HCM Chatbot
+# Data Pipeline - Chatbot
 
 Pipeline xử lý dữ liệu chat từ Chatbot Dịch vụ Công TP. Hồ Chí Minh.
 
 ## Kiến trúc
 
 ```
-Oracle DB → Spark (K8s) → Iceberg (MinIO) → Trino → StarRocks (Gold) → Superset
+Excel (Oracle DB) → Spark → Iceberg (MinIO) → Trino → StarRocks (Gold) → Superset
+                              ↑                   ↑           ↑
+                           Docker              Minikube     Minikube
 ```
+
+## Phân bổ hạ tầng
+
+| Thành phần | Nền tảng | Lý do |
+|-----------|----------|-------|
+| MinIO | Docker | Đơn giản, đủ dùng |
+| PostgreSQL | Docker | Đơn giản, đủ dùng |
+| Superset | Docker | Thiếu RAM nếu chạy trên K8s |
+| StarRocks | Minikube | Cần HA, resource management |
+| Hive Metastore | Minikube | Kết nối Trino/StarRocks qua K8s DNS |
+| Trino | Minikube | K8s quản lý coordinator/worker tốt hơn |
+| Airflow | Minikube | KubernetesExecutor chạy pods động |
 
 ## Cấu trúc thư mục
 
@@ -36,30 +50,31 @@ data/
 
 ## Local URLs & Credentials
 
+### Docker Services
+
 | Dịch vụ | URL | User / Pass |
 |---------|-----|-------------|
 | **MinIO** (Data Lake) | http://localhost:9001 | `dtai16805` / `dtai16805` |
 | **Superset** (BI Dashboard) | http://localhost:8088 | `admin` / `admin` |
-| **Trino** (Query Engine) | http://localhost:8080 | — |
-| **StarRocks** (OLAP) | MySQL port `localhost:9030` | `root` / *(trống)* |
-| **Airflow** (Orchestration) | http://localhost:30080 | `admin` / `admin` |
 
-> **Lưu ý**: Trino và StarRocks cần port-forward từ Minikube:
-> ```bash
-> kubectl port-forward -n trino svc/trino 8080:8080
-> kubectl port-forward -n starrocks svc/my-starrocks-fe-service 9030:9030
-> ```
+### Minikube Services (cần port-forward)
+
+| Dịch vụ | Port-forward | URL | User / Pass |
+|---------|-------------|-----|-------------|
+| **StarRocks** (OLAP) | `kubectl port-forward -n starrocks svc/my-starrocks-fe-service 9030:9030` | MySQL `localhost:9030` | `root` / *(trống)* |
+| **Trino** (Query) | `kubectl port-forward -n trino svc/trino 8080:8080` | http://localhost:8080 | — |
+| **Airflow** (Orchestration) | `kubectl port-forward -n airflow svc/airflow-webserver 8080:8080` | http://localhost:8080 | `admin` / `admin` |
+
+> **Lưu ý**: Trino và Airflow cùng dùng port 8080 → chỉ chạy 1 lúc.
 
 ## Hướng dẫn chạy
 
 ### Bước 1: Khởi động Docker services
 
 ```bash
+cd docker/
 docker compose up -d minio postgres-db superset
 ```
-
-- **MinIO Console**: http://localhost:9001 (tạo bucket `iceberg-warehouse`)
-- **Superset**: http://localhost:8088
 
 ### Bước 2: Khởi động Minikube
 
@@ -67,7 +82,7 @@ docker compose up -d minio postgres-db superset
 minikube start --memory=8g --cpus=4
 ```
 
-### Bước 3: Deploy Trino + Hive Metastore
+### Bước 3: Deploy Hive Metastore + Trino
 
 ```bash
 kubectl create namespace trino
@@ -83,36 +98,41 @@ kubectl create namespace starrocks
 helm install starrocks starrocks/kube-starrocks --namespace starrocks -f kubernets/starrocks-values.yaml
 ```
 
-### Bước 5: Chạy Spark ETL (tạo Iceberg table)
+### Bước 5: Deploy Airflow
+
+```bash
+kubectl create namespace airflow
+kubectl create configmap airflow-dags --from-file=scripts/dag.py -n airflow
+helm install airflow apache-airflow/airflow --namespace airflow -f kubernets/airflow-values.yaml
+```
+
+### Bước 6: Chạy Spark ETL (tạo Iceberg table)
 
 ```bash
 python scripts/spark.py
 ```
 
-### Bước 6: Tạo Gold tables trong StarRocks
+### Bước 7: Tạo Gold tables trong StarRocks
 
 ```bash
-# Port-forward StarRocks
 kubectl port-forward -n starrocks svc/my-starrocks-fe-service 9030:9030
-
-# Chạy DDL (trong DBeaver hoặc MySQL client)
-# Kết nối localhost:9030, chạy file sql/starrocks_init.sql
+# Chạy sql/starrocks_init.sql trong DBeaver (localhost:9030)
 ```
 
-### Bước 7: Chạy Gold Layer ETL
+### Bước 8: Chạy Gold Layer ETL
 
 ```bash
 python scripts/etl_gold.py
 ```
 
-### Bước 8: Kết nối Superset → StarRocks
+### Bước 9: Kết nối Superset → StarRocks
 
 1. Mở http://localhost:8088
 2. **Settings** → **Data** → **Databases** → **+ Database**
 3. SQLAlchemy URI: `mysql+pymysql://root@host.docker.internal:9030/gold_db`
 4. **Test Connection** → **Connect**
 
-### Bước 9: Tạo Charts & Dashboard
+### Bước 10: Tạo Charts & Dashboard
 
 ```sql
 -- Chart 1: Chat theo ngày (Line Chart)
@@ -129,14 +149,14 @@ FROM gold_db.gold_fallback_stats_daily GROUP BY intent_group;
 
 ## Tech Stack
 
-| Thành phần | Công nghệ | Mục đích |
-|-----------|-----------|----------|
-| Data Lake | MinIO (S3) | Lưu trữ Iceberg tables |
-| Processing | Spark 3.5.1 | ETL, xử lý dữ liệu |
-| Catalog | Hive Metastore 4.0.0 | Đăng ký table metadata |
-| Query Engine | Trino 435 | Query Iceberg từ StarRocks |
-| OLAP | StarRocks 5.1.0 | Gold Layer, tổng hợp nhanh |
-| BI | Apache Superset | Dashboard & Charts |
-| Orchestration | Airflow | Schedule Spark jobs |
-| Container | Docker | Local services |
-| Orchestration | Kubernetes (Minikube) | Production-like K8s |
+| Thành phần | Công nghệ | Chạy trên | Mục đích |
+|-----------|-----------|----------|----------|
+| Data Lake | MinIO (S3) | Docker | Lưu trữ Iceberg tables |
+| Processing | Spark 3.5.1 | Local/K8s | ETL, xử lý dữ liệu |
+| Catalog | Hive Metastore 4.0.0 | Minikube | Đăng ký table metadata |
+| Query Engine | Trino 435 | Minikube | Query Iceberg |
+| OLAP | StarRocks 5.1.0 | Minikube | Gold Layer, tổng hợp nhanh |
+| BI | Apache Superset | Docker | Dashboard & Charts |
+| Orchestration | Airflow 2.10.5 | Minikube | Schedule Spark jobs |
+| Container | Docker Desktop | — | Local services |
+| Cluster | Kubernetes (Minikube) | — | Production-like K8s |
