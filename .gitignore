@@ -4,7 +4,7 @@ __pycache__/
 *.pyc
 .env
 
-# Data files (nặng, không push lên GitHub)
+
 data/*.xlsx
 
 
@@ -18,8 +18,4 @@ jars/*.jar
 .vscode/
 .idea/
 
-# Checkpoint
-checkpoint_last_processed.json
 
-# Spark temp
-Usersdtai168spark-local-dirs/
