@@ -62,7 +62,7 @@ data/
 | Dịch vụ | Port-forward | URL | User / Pass |
 |---------|-------------|-----|-------------|
 | **StarRocks** (OLAP) | `kubectl port-forward -n starrocks svc/my-starrocks-fe-service 9030:9030` | MySQL `localhost:9030` | `root` / *(trống)* |
-| **Trino** (Query) | `kubectl port-forward -n trino svc/trino 8081:8081` | http://localhost:8081 | — |
+| **Trino** (Query) | `kubectl port-forward -n trino svc/trino 8081:8080` | http://localhost:8081 | — |
 | **Airflow** (Orchestration) | `kubectl port-forward -n airflow svc/airflow-webserver 8080:8080` | http://localhost:8080 | `admin` / `admin` |
 
 ## Hướng dẫn chạy

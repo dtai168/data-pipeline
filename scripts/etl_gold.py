@@ -8,7 +8,7 @@ STARROCKS_PORT = 9030
 STARROCKS_USER = "root"
 STARROCKS_PASS = ""
 
-TRINO_POD = "trino-coordinator-544985768-tln7q"  # kubectl get pods -n trino
+TRINO_POD = "trino-coordinator-544985768-psxrg"  # kubectl get pods -n trino
 TRINO_NS = "trino"
 
 
@@ -17,7 +17,7 @@ def trino_query(sql):
     cmd = [
         "kubectl", "exec", "-n", TRINO_NS, TRINO_POD,
         "--", "trino", "--server", "localhost:8080",
-        "--catalog", "iceberg", "--schema", "chatbot_db",
+        "--catalog", "iceberg", "--schema", "chatbot_v2",
         "--execute", sql
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)

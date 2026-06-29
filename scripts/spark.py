@@ -11,7 +11,7 @@ S3_ENDPOINT        = os.environ.get("S3_ENDPOINT", "http://127.0.0.1:9000")
 S3_ACCESS_KEY      = os.environ.get("S3_ACCESS_KEY", "dtai16805")
 S3_SECRET_KEY      = os.environ.get("S3_SECRET_KEY", "dtai16805")
 HIVE_METASTORE_URI = os.environ.get("HIVE_METASTORE_URI", "")
-ICEBERG_CATALOG_TYPE = os.environ.get("ICEBERG_CATALOG_TYPE", "hadoop")
+ICEBERG_CATALOG_TYPE = os.environ.get("ICEBERG_CATALOG_TYPE", "hive")
 # Auto-switch to hive catalog when Hive Metastore URI is provided
 if not os.environ.get("ICEBERG_CATALOG_TYPE") and HIVE_METASTORE_URI:
     ICEBERG_CATALOG_TYPE = "hive"
@@ -21,9 +21,9 @@ if os.name == "nt":
 
 # -- Constants ------------------------------------------------------------------
 CHECKPOINT_FILE   = "checkpoint_last_processed.json"
-CHAT_DATA_PATH    = "bot_dvc_hcm.xlsx"
-PREDICT_DATA_PATH = "bot_ddvc_hcm_bot_predict.xlsx"
-OUTPUT_TABLE      = "iceberg.chatbot_db.processed_logs"
+CHAT_DATA_PATH    = "data/bot_dvc_hcm.xlsx"
+PREDICT_DATA_PATH = "data/bot_ddvc_hcm_bot_predict.xlsx"
+OUTPUT_TABLE      = "iceberg.chatbot_v2.processed_logs"
 TEMP_DIR          = os.path.join(tempfile.gettempdir(), "chatbot_etl")
 
 _ORACLE_TS_RE = re.compile(r'(\d{2})\.(\d{2})\.(\d{2})(\.\d+)?')
@@ -153,7 +153,8 @@ def write_via_parquet(spark, pdf):
     spark.read.parquet(pq_path).createOrReplaceTempView(view_name)
 
     if not table_exists(spark):
-        spark.sql("CREATE NAMESPACE IF NOT EXISTS iceberg.chatbot_db")
+        namespace = OUTPUT_TABLE.split(".")[1]
+        spark.sql(f"CREATE NAMESPACE IF NOT EXISTS iceberg.{namespace}")
         print(f"    Creating table {OUTPUT_TABLE}...")
         spark.sql(f"CREATE TABLE {OUTPUT_TABLE} USING iceberg AS SELECT * FROM {view_name}")
     else:
