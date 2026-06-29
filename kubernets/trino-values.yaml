@@ -29,6 +29,10 @@ coordinator:
 worker:
   enabled: false
 
+service:
+  type: NodePort
+  port: 8081
+
 catalogs:
   iceberg: |
     connector.name=iceberg

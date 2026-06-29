@@ -28,17 +28,6 @@ services:
         echo 'Bucket iceberg-warehouse ready.'
       "
 
-  # 2. StarRocks — chay tren Minikube, KHONG dung Docker
-  # starrocks:
-  #   image: starrocks/allin1-ubuntu:latest
-  #   container_name: starrocks-all-in-one
-  #   ports:
-  #     - "9030:9030"
-  #     - "8030:8030"
-  #   volumes:
-  #     - starrocks_data:/starrocks/fe/meta
-
-  # PostgreSQL (Superset metadata)
   postgres:
     image: postgres:15-alpine
     container_name: postgres-db
@@ -64,28 +53,7 @@ services:
     volumes:
       - postgres_hive_data:/var/lib/postgresql/data
 
-  # Hive Metastore — chay tren Minikube, KHONG dung Docker
-  # hive-metastore:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.hive
-  #   container_name: hive-metastore
-  #   ports:
-  #     - "9083:9083"
-  #   depends_on:
-  #     - postgres-hive
-  #     - minio
-  #   environment:
-  #     HIVE_CONF_DIR: /opt/hive/conf
-  #   command: >
-  #     /bin/sh -c "
-  #       /opt/hive/bin/schematool -dbType postgres -info 2>/dev/null || /opt/hive/bin/schematool -dbType postgres -initSchema --verbose &&
-  #       /opt/hive/bin/hive --service metastore
-  #     "
-  #   volumes:
-  #     - ./core-site.xml:/opt/hive/conf/core-site.xml:ro
-
-  # 3. Tầng Visualization (Dashboard)
+  # 2. Tầng Visualization (Dashboard)
   superset:
     build:
       context: .
