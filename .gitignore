@@ -17,5 +17,6 @@ jars/*.jar
 # IDE
 .vscode/
 .idea/
+.claude/
 
 
