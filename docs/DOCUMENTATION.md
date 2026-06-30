@@ -25,7 +25,7 @@
 
 ### 1.1. Kiến trúc tổng thể 
 
-![Kiến trúc](..\images\kien_truc.png)
+![Kiến trúc](images/kien_truc.png)
 
 ### 1.2. Mô tả các tầng
 
@@ -129,7 +129,7 @@ apache-superset      Up 1 minute     0.0.0.0:8088->8088/tcp
 
 #### Kết quả MinIO Console:
 
-![MinIO](..\images\minio.png)
+![MinIO](images/minio.png)
 
 ---
 
@@ -272,7 +272,7 @@ Forwarding from [::1]:8081 -> 8080
 
 #### Kết quả Trino Web UI:
 
-![Trino](..\images\trino.png)
+![Trino](images/trino.png)
 
 ---
 
@@ -338,8 +338,8 @@ Forwarding from [::1]:9030 -> 9030
 
 #### Kết quả DBeaver:
 
-![Dbreaver](..\images\starrocks.png)
-![Dbreaver](..\images\starrocks2.png)
+![Dbreaver](images/starrocks.png)
+![Dbreaver](images/starrocks2.png)
 
 ---
 
@@ -404,7 +404,7 @@ Forwarding from [::1]:8080 -> 8080
 
 #### Kết quả Airflow Web UI:
 
-![Airflow](..\images\airflow.png)
+![Airflow](images/airflow.png)
 
 ---
 
@@ -442,8 +442,8 @@ python scripts/spark.py
 
 #### Kết quả MinIO:
 
-![Trino](..\images\minio-iceberg.png)
-![Trino](..\images\minio-iceberg2.png)
+![Image](images/minio-iceberg.png)
+![Image](images/minio-iceberg2.png)
 
 #### Kiểm tra dữ liệu qua Trino:
 
@@ -461,7 +461,7 @@ FROM iceberg.chatbot_v2.processed_logs;
 
 #### Kết quả:
 
-![Airflow](..\images\1.png)
+![Image](images/1.png)
 
 ```sql
 -- Xem mẫu dữ liệu
@@ -472,7 +472,7 @@ LIMIT 10;
 
 #### Kết quả:
 
-![Airflow](..\images\2.png)
+![Image](images/2.png)
 
 ---
 
@@ -529,9 +529,9 @@ SHOW TABLES;
 
 #### Kết quả:
 
-![Airflow](..\images\3.png)
+![Image](images/3.png)
 
-![Airflow](..\images\4.png)
+![Image](images/4.png)
 
 #### Kiểm tra cấu trúc table:
 
@@ -541,7 +541,7 @@ DESCRIBE gold_db.gold_chat_stats_daily;
 
 #### Kết quả:
 
-![Airflow](..\images\13.png)
+![Image](images/13.png)
 
 ---
 
@@ -603,7 +603,7 @@ Trino pod: trino-coordinator-544985768-psxrg
 
 #### Giải thích luồng xử lý:
 
-![Airflow](..\images\11.png)
+![Image](images/11.png)
 
 #### Kiểm tra dữ liệu Gold:
 
@@ -618,7 +618,7 @@ ORDER BY log_date;
 
 #### Kết quả:
 
-![Airflow](..\images\5.png)
+![Image](images/5.png)
 
 ```sql
 -- 2. Tỷ lệ fallback theo intent
@@ -633,7 +633,7 @@ ORDER BY total DESC;
 
 #### Kết quả:
 
-![Airflow](..\images\6.png)
+![Image](images/6.png)
 
 ---
 
@@ -658,7 +658,7 @@ ORDER BY total DESC;
 
 #### Kiểm tra trong Superset:
 
-![Airflow](..\images\7.png)
+![Image](images/7.png)
 
 ---
 
@@ -678,7 +678,7 @@ ORDER BY log_date;
 
 #### Kết quả:
 
-![Airflow](..\images\8.png)
+![Image](images/8.png)
 
 #### Chart 2: Top Intent (Bar Chart)
 
@@ -693,7 +693,7 @@ ORDER BY total DESC;
 
 #### Kết quả:
 
-![Airflow](..\images\9.png)
+![Image](images/9.png)
 
 #### Chart 3: Tỷ lệ fallback (Pie Chart)
 
@@ -707,11 +707,11 @@ GROUP BY intent_group;
 
 #### Kết quả:
 
-![Airflow](..\images\10.png)
+![Image](images/10.png)
 
 #### Dashboard Tổng hợp:
 
-![Airflow](..\images\12.png)
+![Image](images/12.png)
 
 ---
 
