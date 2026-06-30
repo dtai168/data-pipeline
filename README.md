@@ -4,8 +4,6 @@ Pipeline xử lý dữ liệu chat từ Chatbot.
 
 ## 📚 Tài liệu
 
-> Xem hướng dẫn chi tiết tại Claude-Opus(docs/DOCUMENTATION.md)
-
 | Tài liệu | Mô tả |
 |---------|-------|
 | [Documentation](docs/DOCUMENTATION.md) | Hướng dẫn từng bước với kết quả mong đợi, Mermaid diagrams, troubleshooting |
